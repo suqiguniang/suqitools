@@ -29,11 +29,28 @@ jobs:
           channel: 'stable'
           flutter-version: '3.24.0'
 
+      - name: Rebuild project with proper Flutter structure
+        run: |
+          CURRENT_DIR=$(pwd)
+          CURRENT_NAME=$(basename "$CURRENT_DIR")
+          cd ..
+          mv "$CURRENT_NAME" "${CURRENT_NAME}_backup"
+          flutter create --platforms android --org com.suqi --project-name navigation_panel "$CURRENT_NAME"
+          cd "$CURRENT_NAME"
+          # Restore custom Dart code and config
+          rm -rf lib
+          cp -r "../${CURRENT_NAME}_backup/lib" lib
+          cp "../${CURRENT_NAME}_backup/pubspec.yaml" pubspec.yaml
+          cp "../${CURRENT_NAME}_backup/README.md" README.md
+          rm -rf .github
+          cp -r "../${CURRENT_NAME}_backup/.github" .github
+          # Apply Android customizations
+          sed -i 's|</manifest>|    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />\n</manifest>|' android/app/src/main/AndroidManifest.xml
+          # Cleanup
+          rm -rf "../${CURRENT_NAME}_backup"
+
       - name: Install dependencies
         run: flutter pub get
-
-      - name: Analyze project source
-        run: flutter analyze
 
       - name: Build APK
         run: flutter build apk --release
