@@ -71,8 +71,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _checkForUpdate() async {
-    if (_isCheckingUpdate) return;
-
     setState(() => _isCheckingUpdate = true);
 
     final updateInfo = await UpdateService.checkForUpdate();
@@ -184,11 +182,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  DateTime? _lastSnackBarTime;
+
   void _showError(String message) {
+    final now = DateTime.now();
+    if (_lastSnackBarTime != null && now.difference(_lastSnackBarTime!).inSeconds < 2) {
+      return;
+    }
+    _lastSnackBarTime = now;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
+        duration: const Duration(seconds: 2),
       ),
     );
   }

@@ -50,20 +50,36 @@ class _ComputerSettingsScreenState extends State<ComputerSettingsScreen> {
     }
   }
 
+  DateTime? _lastSnackBarTime;
+
   void _showError(String message) {
+    final now = DateTime.now();
+    if (_lastSnackBarTime != null && now.difference(_lastSnackBarTime!).inSeconds < 2) {
+      return;
+    }
+    _lastSnackBarTime = now;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
+
+  DateTime? _lastWakeTime;
 
   Future<void> _wakeComputer(ComputerModel computer) async {
     if (computer.macAddress.isEmpty) {
       _showError('MAC 地址为空');
       return;
     }
+
+    final now = DateTime.now();
+    if (_lastWakeTime != null && now.difference(_lastWakeTime!).inSeconds < 3) {
+      return;
+    }
+    _lastWakeTime = now;
 
     final success = await WolService.sendWolPacket(
       computer.macAddress,
@@ -74,6 +90,7 @@ class _ComputerSettingsScreenState extends State<ComputerSettingsScreen> {
         SnackBar(
           content: Text(success ? '唤醒指令已发送: ${computer.name}' : '唤醒指令发送失败'),
           backgroundColor: success ? Colors.green : Colors.red,
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -256,11 +273,19 @@ class _ComputerEditDialogState extends State<_ComputerEditDialog> {
     }
   }
 
+  DateTime? _lastSnackBarTime;
+
   void _showError(String message) {
+    final now = DateTime.now();
+    if (_lastSnackBarTime != null && now.difference(_lastSnackBarTime!).inSeconds < 2) {
+      return;
+    }
+    _lastSnackBarTime = now;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
+        duration: const Duration(seconds: 2),
       ),
     );
   }

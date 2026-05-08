@@ -57,11 +57,19 @@ class _ComputerCardState extends State<ComputerCard> {
     }
   }
 
+  DateTime? _lastWakeTime;
+
   Future<void> _wakeOnLan() async {
     if (widget.computer.macAddress.isEmpty) {
       _showError('MAC 地址为空');
       return;
     }
+
+    final now = DateTime.now();
+    if (_lastWakeTime != null && now.difference(_lastWakeTime!).inSeconds < 3) {
+      return;
+    }
+    _lastWakeTime = now;
 
     setState(() => _isWaking = true);
     final success = await WolService.sendWolPacket(
@@ -74,6 +82,7 @@ class _ComputerCardState extends State<ComputerCard> {
         SnackBar(
           content: Text(success ? '唤醒指令已发送: ${widget.computer.name}' : '唤醒指令发送失败'),
           backgroundColor: success ? Colors.green : Colors.red,
+          duration: const Duration(seconds: 2),
         ),
       );
       if (success) {
@@ -83,11 +92,19 @@ class _ComputerCardState extends State<ComputerCard> {
     }
   }
 
+  DateTime? _lastSnackBarTime;
+
   void _showError(String message) {
+    final now = DateTime.now();
+    if (_lastSnackBarTime != null && now.difference(_lastSnackBarTime!).inSeconds < 2) {
+      return;
+    }
+    _lastSnackBarTime = now;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
