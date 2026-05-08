@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
 void main() {
-  runApp(const NavigationPanelApp());
+  runApp(const QiXiaoHeApp());
 }
 
-class NavigationPanelApp extends StatelessWidget {
-  const NavigationPanelApp({super.key});
+class QiXiaoHeApp extends StatelessWidget {
+  const QiXiaoHeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Navigation Panel',
+      title: '柒小盒',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
