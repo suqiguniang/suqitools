@@ -21,3 +21,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # App icon configuration
+  # Icons are placed in android/app/src/main/res/mipmap-*/ic_launcher.png
