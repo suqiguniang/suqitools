@@ -44,8 +44,8 @@ jobs:
           cp "../${CURRENT_NAME}_backup/README.md" README.md
           rm -rf .github
           cp -r "../${CURRENT_NAME}_backup/.github" .github
-          # Fix Android Gradle Plugin version for webview compatibility
-          sed -i 's|id "com.android.application" version "8.1.0" apply false|id "com.android.application" version "8.2.0" apply false|' android/settings.gradle
+          # Fix Android Gradle Plugin version for webview and Java 21 compatibility
+          sed -i 's|id "com.android.application" version "8.1.0" apply false|id "com.android.application" version "8.2.1" apply false|' android/settings.gradle
           # Fix Gradle version for Java 21 compatibility
           sed -i 's|gradle-8.2-all.zip|gradle-8.5-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
           # Apply Android customizations
