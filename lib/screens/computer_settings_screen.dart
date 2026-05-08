@@ -50,6 +50,23 @@ class _ComputerSettingsScreenState extends State<ComputerSettingsScreen> {
     }
   }
 
+  Future<void> _wakeComputer(ComputerModel computer) async {
+    if (computer.macAddress.isEmpty) {
+      _showError('MAC 地址为空');
+      return;
+    }
+
+    final success = await WolService.sendWolPacket(computer.macAddress);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(success ? '唤醒指令已发送: ${computer.name}' : '唤醒指令发送失败'),
+          backgroundColor: success ? Colors.green : Colors.red,
+        ),
+      );
+    }
+  }
+
   Future<void> _deleteComputer(ComputerModel computer) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -114,30 +131,39 @@ class _ComputerSettingsScreenState extends State<ComputerSettingsScreen> {
                   itemCount: _computers.length,
                   itemBuilder: (context, index) {
                     final computer = _computers[index];
-                    return ListTile(
-                      leading: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: computer.isOnline ? Colors.green : Colors.grey,
-                          shape: BoxShape.circle,
+                    return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      child: ListTile(
+                        leading: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: computer.isOnline ? Colors.green : Colors.grey,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
-                      title: Text(computer.name),
-                      subtitle: Text('${computer.ipAddress}\n${computer.macAddress}'),
-                      isThreeLine: true,
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit_outlined),
-                            onPressed: () => _editComputer(computer),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            onPressed: () => _deleteComputer(computer),
-                          ),
-                        ],
+                        title: Text(computer.name),
+                        subtitle: Text('${computer.ipAddress}\n${computer.macAddress}'),
+                        isThreeLine: true,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.power_settings_new),
+                              tooltip: '唤醒电脑',
+                              color: computer.isOnline ? Colors.green : null,
+                              onPressed: () => _wakeComputer(computer),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit_outlined),
+                              onPressed: () => _editComputer(computer),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              onPressed: () => _deleteComputer(computer),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },

@@ -216,11 +216,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(),
           const _SectionHeader(title: '应用信息'),
-          const ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('应用名称'),
-            trailing: Text('柒小盒'),
-          ),
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('版本'),
