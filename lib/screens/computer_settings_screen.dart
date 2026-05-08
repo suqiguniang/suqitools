@@ -56,7 +56,10 @@ class _ComputerSettingsScreenState extends State<ComputerSettingsScreen> {
       return;
     }
 
-    final success = await WolService.sendWolPacket(computer.macAddress);
+    final success = await WolService.sendWolPacket(
+      computer.macAddress,
+      ipAddress: computer.ipAddress,
+    );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
