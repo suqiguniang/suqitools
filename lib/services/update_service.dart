@@ -25,6 +25,9 @@ class UpdateService {
   static const String _repoName = 'suqitools';
   static const String _apiUrl = 'https://api.github.com/repos/$_repoOwner/$_repoName/releases/latest';
 
+  static DateTime? _lastCheckTime;
+  static const Duration _minCheckInterval = Duration(seconds: 5);
+
   /// 获取当前应用版本
   static Future<String> getCurrentVersion() async {
     try {
@@ -39,6 +42,14 @@ class UpdateService {
   /// 检查是否有新版本
   static Future<UpdateInfo?> checkForUpdate() async {
     try {
+      // 防频繁点击：最短间隔 5 秒
+      final now = DateTime.now();
+      if (_lastCheckTime != null && now.difference(_lastCheckTime!) < _minCheckInterval) {
+        print('更新检查过于频繁，请稍后再试');
+        return null;
+      }
+      _lastCheckTime = now;
+
       final currentVersion = await getCurrentVersion();
       
       final response = await http.get(

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SettingsService {
   static const String _wolIpKey = 'wol_ip';
   static const String _wolMacKey = 'wol_mac';
+  static const String _debugModeKey = 'debug_mode';
   static const String _defaultIp = '192.168.1.100';
   static const String _defaultMac = '00:00:00:00:00:00';
 
@@ -27,5 +28,15 @@ class SettingsService {
   static Future<void> setWolMac(String mac) async {
     final prefs = await _prefs;
     await prefs.setString(_wolMacKey, mac);
+  }
+
+  static Future<bool> getDebugMode() async {
+    final prefs = await _prefs;
+    return prefs.getBool(_debugModeKey) ?? false;
+  }
+
+  static Future<void> setDebugMode(bool enabled) async {
+    final prefs = await _prefs;
+    await prefs.setBool(_debugModeKey, enabled);
   }
 }

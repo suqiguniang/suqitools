@@ -64,7 +64,10 @@ class _ComputerCardState extends State<ComputerCard> {
     }
 
     setState(() => _isWaking = true);
-    final success = await WolService.sendWolPacket(widget.computer.macAddress);
+    final success = await WolService.sendWolPacket(
+      widget.computer.macAddress,
+      ipAddress: widget.computer.ipAddress,
+    );
     if (mounted) {
       setState(() => _isWaking = false);
       ScaffoldMessenger.of(context).showSnackBar(

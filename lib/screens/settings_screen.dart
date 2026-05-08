@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/update_service.dart';
+import '../services/settings_service.dart';
+import '../services/wol_service.dart';
 import 'computer_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -11,16 +13,52 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  static const String _githubUrl = 'https://github.com/suqiguniang/suqitools';
+  static const String _githubUrl = '<url id="" type="url" status="" title="" wc="">https://github.com/suqiguniang/suqitools</url>';
 
   bool _isCheckingUpdate = false;
   String _currentVersion = '1.0.0';
   UpdateInfo? _updateInfo;
+  bool _debugMode = false;
+  final List<String> _logs = [];
 
   @override
   void initState() {
     super.initState();
     _loadCurrentVersion();
+    _loadDebugMode();
+    _listenLogs();
+  }
+
+  Future<void> _loadDebugMode() async {
+    final enabled = await SettingsService.getDebugMode();
+    if (mounted) {
+      setState(() {
+        _debugMode = enabled;
+      });
+    }
+  }
+
+  void _listenLogs() {
+    WolService.logStream.listen((log) {
+      if (mounted && _debugMode) {
+        setState(() {
+          _logs.add(log);
+          if (_logs.length > 200) {
+            _logs.removeAt(0);
+          }
+        });
+      }
+    });
+  }
+
+  Future<void> _toggleDebugMode(bool value) async {
+    await SettingsService.setDebugMode(value);
+    setState(() {
+      _debugMode = value;
+      if (!value) {
+        _logs.clear();
+      }
+    });
   }
 
   Future<void> _loadCurrentVersion() async {
@@ -33,6 +71,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _checkForUpdate() async {
+    if (_isCheckingUpdate) return;
+
     setState(() => _isCheckingUpdate = true);
 
     final updateInfo = await UpdateService.checkForUpdate();
@@ -214,7 +254,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.open_in_new, size: 18),
             onTap: () => _launchUrl(_githubUrl),
           ),
-          const Divider(),
+          const Divider(height: 32),
+          const _SectionHeader(title: '调试'),
+          SwitchListTile(
+            secondary: const Icon(Icons.bug_report_outlined),
+            title: const Text('Debug 模式'),
+            subtitle: const Text('开启后显示操作日志'),
+            value: _debugMode,
+            onChanged: _toggleDebugMode,
+          ),
+          if (_debugMode) ...[
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '操作日志',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _logs.clear();
+                      });
+                    },
+                    icon: const Icon(Icons.clear_all, size: 18),
+                    label: const Text('清空'),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black87,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              constraints: const BoxConstraints(maxHeight: 300),
+              child: _logs.isEmpty
+                  ? const Center(
+                      child: Text(
+                        '暂无日志',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      reverse: true,
+                      child: SelectableText(
+                        _logs.join('\n'),
+                        style: const TextStyle(
+                          color: Colors.greenAccent,
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+          const Divider(height: 32),
           const _SectionHeader(title: '应用信息'),
           ListTile(
             leading: const Icon(Icons.info_outline),

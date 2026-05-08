@@ -50,13 +50,25 @@ class _ComputerSettingsScreenState extends State<ComputerSettingsScreen> {
     }
   }
 
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
   Future<void> _wakeComputer(ComputerModel computer) async {
     if (computer.macAddress.isEmpty) {
       _showError('MAC 地址为空');
       return;
     }
 
-    final success = await WolService.sendWolPacket(computer.macAddress);
+    final success = await WolService.sendWolPacket(
+      computer.macAddress,
+      ipAddress: computer.ipAddress,
+    );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
