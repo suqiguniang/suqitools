@@ -10,18 +10,19 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { CardItem } from '../types';
-import { DEFAULT_MAC, DEFAULT_IP, DEFAULT_PORT } from '../wol';
+import { DEFAULT_MAC, DEFAULT_IP, DEFAULT_PORT } from '../services/wolService';
+import { Colors, Spacing, BorderRadius, Shadows } from '../theme';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSave: (card: Omit<CardItem, "id">) => void;
+  onSave: (card: Omit<CardItem, 'id'>) => void;
   editCard?: CardItem | null;
 }
 
-const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) => {
+export const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) => {
   const isEditing = !!editCard;
-  
+
   const [type, setType] = useState<'web' | 'wol'>('web');
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
@@ -29,11 +30,9 @@ const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) =
   const [ipAddress, setIpAddress] = useState(DEFAULT_IP);
   const [port, setPort] = useState(DEFAULT_PORT.toString());
 
-  // 当编辑模式或可见性改变时，重置表单
   useEffect(() => {
     if (visible) {
       if (editCard) {
-        // 编辑模式：填充现有数据
         setType(editCard.type);
         setTitle(editCard.title || '');
         setUrl(editCard.url || '');
@@ -41,7 +40,6 @@ const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) =
         setIpAddress(editCard.ipAddress || DEFAULT_IP);
         setPort(editCard.port?.toString() || DEFAULT_PORT.toString());
       } else {
-        // 新增模式：重置为默认值
         setType('web');
         setTitle('');
         setUrl('');
@@ -70,16 +68,12 @@ const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) =
     onClose();
   };
 
-  const handleClose = () => {
-    onClose();
-  };
-
   return (
     <Modal
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={handleClose}
+      onRequestClose={onClose}
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
@@ -87,8 +81,8 @@ const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) =
             <Text style={styles.headerTitle}>
               {isEditing ? '编辑卡片' : '添加卡片'}
             </Text>
-            <TouchableOpacity onPress={handleClose}>
-              <Icon name="close" size={24} color="#333" />
+            <TouchableOpacity onPress={onClose}>
+              <Icon name="close" size={24} color={Colors.textPrimary} />
             </TouchableOpacity>
           </View>
 
@@ -99,7 +93,7 @@ const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) =
                 onPress={() => setType('web')}
                 disabled={isEditing}
               >
-                <Icon name="web" size={20} color={type === 'web' ? '#fff' : '#666'} />
+                <Icon name="web" size={20} color={type === 'web' ? Colors.surface : Colors.textSecondary} />
                 <Text style={[styles.typeText, type === 'web' && styles.typeTextActive]}>
                   网页
                 </Text>
@@ -109,7 +103,7 @@ const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) =
                 onPress={() => setType('wol')}
                 disabled={isEditing}
               >
-                <Icon name="power" size={20} color={type === 'wol' ? '#fff' : '#666'} />
+                <Icon name="power" size={20} color={type === 'wol' ? Colors.surface : Colors.textSecondary} />
                 <Text style={[styles.typeText, type === 'wol' && styles.typeTextActive]}>
                   WOL
                 </Text>
@@ -123,6 +117,7 @@ const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) =
                 value={title}
                 onChangeText={setTitle}
                 placeholder="输入卡片标题"
+                placeholderTextColor={Colors.textDisabled}
               />
             </View>
 
@@ -136,6 +131,7 @@ const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) =
                   placeholder="https://example.com"
                   keyboardType="url"
                   autoCapitalize="none"
+                  placeholderTextColor={Colors.textDisabled}
                 />
               </View>
             ) : (
@@ -148,6 +144,7 @@ const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) =
                     onChangeText={setMacAddress}
                     placeholder="00:E0:4C:4D:1E:38"
                     autoCapitalize="characters"
+                    placeholderTextColor={Colors.textDisabled}
                   />
                   <Text style={styles.hint}>默认: {DEFAULT_MAC}</Text>
                 </View>
@@ -157,7 +154,8 @@ const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) =
                     style={styles.input}
                     value={ipAddress}
                     onChangeText={setIpAddress}
-                    placeholder="192.168.1.5"
+                    placeholder="192.168.1.255"
+                    placeholderTextColor={Colors.textDisabled}
                   />
                   <Text style={styles.hint}>默认: {DEFAULT_IP}</Text>
                 </View>
@@ -169,6 +167,7 @@ const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCard }) =
                     onChangeText={setPort}
                     placeholder="9"
                     keyboardType="number-pad"
+                    placeholderTextColor={Colors.textDisabled}
                   />
                   <Text style={styles.hint}>默认: {DEFAULT_PORT}</Text>
                 </View>
@@ -194,87 +193,85 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
     maxHeight: '80%',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: Colors.border,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: Colors.textPrimary,
   },
   form: {
-    padding: 16,
+    padding: Spacing.md,
   },
   typeSelector: {
     flexDirection: 'row',
-    marginBottom: 16,
+    marginBottom: Spacing.md,
   },
   typeButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.background,
     marginHorizontal: 4,
     gap: 8,
   },
   typeButtonActive: {
-    backgroundColor: '#2196F3',
+    backgroundColor: Colors.primary,
   },
   typeText: {
     fontSize: 14,
-    color: '#666',
+    color: Colors.textSecondary,
     fontWeight: '500',
   },
   typeTextActive: {
-    color: '#fff',
+    color: Colors.surface,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: Spacing.md,
   },
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: Colors.textPrimary,
     marginBottom: 6,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: Colors.border,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.md,
     fontSize: 14,
-    color: '#333',
+    color: Colors.textPrimary,
   },
   hint: {
     fontSize: 12,
-    color: '#999',
+    color: Colors.textDisabled,
     marginTop: 4,
   },
   saveButton: {
-    backgroundColor: '#2196F3',
-    margin: 16,
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: Colors.primary,
+    margin: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
   },
   saveButtonText: {
-    color: '#fff',
+    color: Colors.surface,
     fontSize: 16,
     fontWeight: '600',
   },
 });
-
-export default AddCardModal;

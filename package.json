@@ -23,6 +23,7 @@
     "react-native-screens": "^4.25.0",
     "react-native-udp": "^4.1.7",
     "react-native-vector-icons": "^10.3.0",
+    "react-native-wake-on-lan": "^0.2.1",
     "react-native-webview": "^13.16.1"
   },
   "devDependencies": {
