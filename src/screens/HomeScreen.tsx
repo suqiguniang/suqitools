@@ -23,6 +23,7 @@ const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [cards, setCards] = useState<CardItem[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [editingCard, setEditingCard] = useState<CardItem | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -41,13 +42,33 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   const handleAddCard = async (cardData: Omit<CardItem, "id">) => {
-    const newCard: CardItem = {
-      ...cardData,
-      id: Date.now().toString(),
-    };
-    const updatedCards = [...cards, newCard];
-    setCards(updatedCards);
-    await saveCards(updatedCards);
+    if (editingCard) {
+      // 编辑现有卡片
+      const updatedCard: CardItem = {
+        ...cardData,
+        id: editingCard.id,
+      };
+      const updatedCards = cards.map(c => 
+        c.id === editingCard.id ? updatedCard : c
+      );
+      setCards(updatedCards);
+      await saveCards(updatedCards);
+      setEditingCard(null);
+    } else {
+      // 添加新卡片
+      const newCard: CardItem = {
+        ...cardData,
+        id: Date.now().toString(),
+      };
+      const updatedCards = [...cards, newCard];
+      setCards(updatedCards);
+      await saveCards(updatedCards);
+    }
+  };
+
+  const handleEditCard = (card: CardItem) => {
+    setEditingCard(card);
+    setModalVisible(true);
   };
 
   const handleDeleteCard = (card: CardItem) => {
@@ -75,11 +96,17 @@ const HomeScreen: React.FC = () => {
     }
   };
 
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setEditingCard(null);
+  };
+
   const renderItem = ({ item }: { item: CardItem }) => (
     <CardItemComponent
       item={item}
       onPress={handleCardPress}
       onLongPress={handleDeleteCard}
+      onEdit={handleEditCard}
     />
   );
 
@@ -89,7 +116,10 @@ const HomeScreen: React.FC = () => {
         <Text style={styles.headerTitle}>苏小盒</Text>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => setModalVisible(true)}
+          onPress={() => {
+            setEditingCard(null);
+            setModalVisible(true);
+          }}
         >
           <Icon name="plus" size={24} color="#2196F3" />
         </TouchableOpacity>
@@ -115,8 +145,9 @@ const HomeScreen: React.FC = () => {
 
       <AddCardModal
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        onClose={handleCloseModal}
         onSave={handleAddCard}
+        editCard={editingCard}
       />
     </View>
   );

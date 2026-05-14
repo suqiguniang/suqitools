@@ -14,24 +14,49 @@ interface Props {
   item: CardItemType;
   onPress: (item: CardItemType) => void;
   onLongPress: (item: CardItemType) => void;
+  onEdit: (item: CardItemType) => void;
 }
 
-const CardItemComponent: React.FC<Props> = ({ item, onPress, onLongPress }) => {
+const CardItemComponent: React.FC<Props> = ({ item, onPress, onLongPress, onEdit }) => {
   const handlePress = async () => {
     if (item.type === 'wol') {
       try {
+        if (!item.macAddress) {
+          Alert.alert('错误', 'MAC地址未设置');
+          return;
+        }
+        
         await sendWOL(
-          item.macAddress || '',
+          item.macAddress,
           item.ipAddress,
           item.port || 9
         );
-        Alert.alert('成功', `已发送唤醒信号到 ${item.title}`);
-      } catch (error) {
-        Alert.alert('错误', '发送唤醒信号失败');
+        Alert.alert('成功', `已发送唤醒信号到 ${item.title}\nMAC: ${item.macAddress}\nIP: ${item.ipAddress || '192.168.1.5'}`);
+      } catch (error: any) {
+        Alert.alert('错误', `发送唤醒信号失败: ${error.message || '未知错误'}`);
       }
     } else {
       onPress(item);
     }
+  };
+
+  const handleLongPress = () => {
+    Alert.alert(
+      '卡片操作',
+      `选择对 "${item.title}" 的操作`,
+      [
+        { text: '取消', style: 'cancel' },
+        {
+          text: '编辑',
+          onPress: () => onEdit(item),
+        },
+        {
+          text: '删除',
+          style: 'destructive',
+          onPress: () => onLongPress(item),
+        },
+      ]
+    );
   };
 
   const getIcon = () => {
@@ -41,14 +66,21 @@ const CardItemComponent: React.FC<Props> = ({ item, onPress, onLongPress }) => {
 
   const getSubtitle = () => {
     if (item.type === 'web') return item.url;
-    return item.macAddress;
+    return `${item.macAddress || '未设置MAC'}`;
+  };
+
+  const getDetailText = () => {
+    if (item.type === 'wol') {
+      return `IP: ${item.ipAddress || '192.168.1.5'} | 端口: ${item.port || 9}`;
+    }
+    return null;
   };
 
   return (
     <TouchableOpacity
       style={styles.container}
       onPress={handlePress}
-      onLongPress={() => onLongPress(item)}
+      onLongPress={handleLongPress}
       activeOpacity={0.7}
     >
       <View style={styles.iconContainer}>
@@ -61,6 +93,11 @@ const CardItemComponent: React.FC<Props> = ({ item, onPress, onLongPress }) => {
         <Text style={styles.subtitle} numberOfLines={1}>
           {getSubtitle()}
         </Text>
+        {getDetailText() && (
+          <Text style={styles.detail} numberOfLines={1}>
+            {getDetailText()}
+          </Text>
+        )}
       </View>
       <Icon 
         name={item.type === 'web' ? 'open-in-new' : 'power'} 
@@ -106,6 +143,11 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 12,
     color: '#999',
+    marginTop: 2,
+  },
+  detail: {
+    fontSize: 11,
+    color: '#bbb',
     marginTop: 2,
   },
 });
