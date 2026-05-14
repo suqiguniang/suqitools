@@ -14,6 +14,14 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        lfs: true
+
+    - name: Verify assets exist
+      run: |
+        ls -la src/assets/
+        file src/assets/placeholder.png
+        test -f src/assets/placeholder.png || (echo "ERROR: placeholder.png not found!" && exit 1)
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
