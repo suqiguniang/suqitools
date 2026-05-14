@@ -27,7 +27,6 @@ const SettingsScreen: React.FC = () => {
         <Image
           source={{ uri: APP_ICON_URL }}
           style={styles.appIcon}
-          defaultSource={require('../assets/placeholder.png')}
         />
         <Text style={styles.appName}>苏小盒</Text>
         <Text style={styles.appVersion}>版本 1.0.0</Text>
