@@ -48,11 +48,11 @@ export const WolCard: React.FC<Props> = ({ item, onPress, onLongPress }) => {
         {isLoading ? (
           <ActivityIndicator size="small" color={Colors.primary} />
         ) : (
-          <Icon
-            name={success ? 'check-circle' : 'power'}
-            size={28}
-            color={getStatusColor()}
-          />
+            <Icon
+              name={item.icon || (success ? 'check-circle' : 'power')}
+              size={28}
+              color={getStatusColor()}
+            />
         )}
       </View>
       <View style={styles.content}>
@@ -62,10 +62,13 @@ export const WolCard: React.FC<Props> = ({ item, onPress, onLongPress }) => {
         <Text style={styles.subtitle} numberOfLines={1}>
           {item.macAddress || '未设置 MAC'}
         </Text>
-        <Text style={styles.detail} numberOfLines={1}>
-          {item.ipAddress || '192.168.1.255'}:{item.port || 9}
-        </Text>
-      </View>
+          <Text style={styles.detail} numberOfLines={1}>
+            {item.ipAddress || '192.168.1.255'}:{item.port || 9}
+          </Text>
+          <Text style={[styles.status, {color: isLoading ? Colors.warning : (success ? Colors.success : Colors.error)}]} numberOfLines={1}>
+            {isLoading ? '发送中...' : success ? '在线' : '离线'}
+          </Text>
+        </View>
       <Icon name="power" size={20} color={getStatusColor()} />
     </TouchableOpacity>
   );
@@ -111,6 +114,10 @@ const styles = StyleSheet.create({
   detail: {
     fontSize: 11,
     color: Colors.textDisabled,
+    marginTop: 2,
+  },
+  status: {
+    fontSize: 11,
     marginTop: 2,
   },
 });

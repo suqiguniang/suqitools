@@ -29,6 +29,7 @@ export const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCa
   const [macAddress, setMacAddress] = useState(DEFAULT_MAC);
   const [ipAddress, setIpAddress] = useState(DEFAULT_IP);
   const [port, setPort] = useState(DEFAULT_PORT.toString());
+  const [icon, setIcon] = useState('');
 
   useEffect(() => {
     if (visible) {
@@ -38,14 +39,16 @@ export const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCa
         setUrl(editCard.url || '');
         setMacAddress(editCard.macAddress || DEFAULT_MAC);
         setIpAddress(editCard.ipAddress || DEFAULT_IP);
-        setPort(editCard.port?.toString() || DEFAULT_PORT.toString());
+          setPort(editCard.port?.toString() || DEFAULT_PORT.toString());
+          setIcon(editCard.icon || '');
       } else {
         setType('web');
         setTitle('');
         setUrl('');
         setMacAddress(DEFAULT_MAC);
         setIpAddress(DEFAULT_IP);
-        setPort(DEFAULT_PORT.toString());
+          setPort(DEFAULT_PORT.toString());
+          setIcon('');
       }
     }
   }, [visible, editCard]);
@@ -56,14 +59,15 @@ export const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCa
     if (type === 'web' && !url.trim()) return;
     if (type === 'wol' && !macAddress.trim()) return;
 
-    onSave({
-      type,
-      title: title.trim(),
-      url: type === 'web' ? url.trim() : undefined,
-      macAddress: type === 'wol' ? macAddress.trim() : undefined,
-      ipAddress: type === 'wol' ? ipAddress.trim() || DEFAULT_IP : undefined,
-      port: type === 'wol' ? parseInt(port, 10) || DEFAULT_PORT : undefined,
-    });
+      onSave({
+        type,
+        title: title.trim(),
+        icon: icon.trim() || undefined,
+        url: type === 'web' ? url.trim() : undefined,
+        macAddress: type === 'wol' ? macAddress.trim() : undefined,
+        ipAddress: type === 'wol' ? ipAddress.trim() || DEFAULT_IP : undefined,
+        port: type === 'wol' ? parseInt(port, 10) || DEFAULT_PORT : undefined,
+      });
 
     onClose();
   };
@@ -120,6 +124,18 @@ export const AddCardModal: React.FC<Props> = ({ visible, onClose, onSave, editCa
                 placeholderTextColor={Colors.textDisabled}
               />
             </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>图标</Text>
+            <TextInput
+              style={styles.input}
+              value={icon}
+              onChangeText={setIcon}
+              placeholder="MaterialCommunityIcons 名称，如 github"
+              autoCapitalize="none"
+              placeholderTextColor={Colors.textDisabled}
+            />
+          </View>
 
             {type === 'web' ? (
               <View style={styles.inputGroup}>
