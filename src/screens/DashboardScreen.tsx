@@ -90,28 +90,46 @@ export const DashboardScreen: React.FC = () => {
     );
   };
 
+  // Handle long press actions: edit or delete
+  const handleCardLongPress = (card: CardItem) => {
+    Alert.alert(
+      '卡片操作',
+      `请选择对 "${card.title}" 的操作`,
+      [
+        { text: '取消', style: 'cancel' },
+        { text: '编辑', onPress: () => handleEditCard(card) },
+        { text: '删除', style: 'destructive', onPress: () => handleDeleteCard(card) },
+      ]
+    );
+  };
+
   const handleCardPress = (card: CardItem) => {
     if (card.type === 'web' && card.url) {
-      navigation.navigate('WebView', { url: card.url, title: card.title });
+      // Ensure URL includes scheme for proper loading, default to http:// if missing
+      const normalizedUrl =
+        card.url.startsWith('http://') || card.url.startsWith('https://')
+          ? card.url
+          : `http://${card.url}`;
+      navigation.navigate('WebView', { url: normalizedUrl, title: card.title });
     }
   };
 
   const renderItem = ({ item }: { item: CardItem }) => {
     if (item.type === 'wol') {
       return (
-        <WolCard
-          item={item}
-          onPress={handleCardPress}
-          onLongPress={handleDeleteCard}
-        />
+          <WolCard
+            item={item}
+            onPress={handleCardPress}
+            onLongPress={() => handleCardLongPress(item)}
+          />
       );
     }
     return (
-      <QuickLinkCard
-        item={item}
-        onPress={handleCardPress}
-        onLongPress={handleDeleteCard}
-      />
+        <QuickLinkCard
+          item={item}
+          onPress={handleCardPress}
+          onLongPress={() => handleCardLongPress(item)}
+        />
     );
   };
 
