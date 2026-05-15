@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,12 @@ import {
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Switch } from 'react-native';
 
 const GITHUB_URL = 'https://github.com/suqiguniang/suqitools';
 const APP_ICON_URL = 'https://suqiguniang.github.io/img/111238110.png';
+const DEBUG_KEY = '@suxiaobox_debug';
 
 const SettingsScreen: React.FC = () => {
   const openGitHub = async () => {
@@ -19,6 +22,21 @@ const SettingsScreen: React.FC = () => {
     if (supported) {
       await Linking.openURL(GITHUB_URL);
     }
+  };
+
+  const [debugMode, setDebugMode] = useState(false);
+
+  useEffect(() => {
+    const loadDebug = async () => {
+      const val = await AsyncStorage.getItem(DEBUG_KEY);
+      setDebugMode(val === 'true');
+    };
+    loadDebug();
+  }, []);
+
+  const toggleDebug = async (value: boolean) => {
+    setDebugMode(value);
+    await AsyncStorage.setItem(DEBUG_KEY, value.toString());
   };
 
   return (
@@ -89,6 +107,18 @@ const SettingsScreen: React.FC = () => {
               支持 Android 桌面小组件，快速访问
             </Text>
           </View>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>调试</Text>
+        <View style={styles.item}>
+          <Icon name="bug" size={24} color="#333" />
+          <View style={styles.itemContent}>
+            <Text style={styles.itemTitle}>Debug 模式</Text>
+            <Text style={styles.itemSubtitle}>在调试模式下启用额外日志输出</Text>
+          </View>
+          <Switch value={debugMode} onValueChange={toggleDebug} />
         </View>
       </View>
 
